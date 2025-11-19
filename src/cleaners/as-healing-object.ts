@@ -1,7 +1,6 @@
-/**
- * @prettier
- */
 import { asMaybe, asObject } from 'cleaners'
+
+import type { Cleaner, CleanerShape } from 'cleaners'
 
 /**
  * Cleans an object that may contain errors.
@@ -11,65 +10,69 @@ import { asMaybe, asObject } from 'cleaners'
  * fallback is provided. For shape objects, this will use the matching property
  * on the required fallback object.
  *
- * @param {Function|Object} shape - Either a cleaner function (for key-value objects)
- *   or a shape object with cleaner functions as values (for structured objects)
- * @param {Object} [fallback] - Optional fallback object. For key-value objects,
- *   provides default values for keys that fail validation. For shape objects,
- *   required and provides default values for all properties.
- * @returns {Function} A cleaner function that returns a cleaned object
+ * @param cleaner - The cleaner function to apply to each object value (for key-value objects)
+ * @param fallback - Optional fallback object providing default values for keys that fail validation
+ * @returns A cleaner function that returns a cleaned key-value object
  *
  * @example
- * // Key-value object with fallback
- * ```javascript
+ * ```typescript
  * import { asHealingObject } from '@edge.app/x-cleaners'
  * import { asNumber } from 'cleaners'
  *
+ * // Key-value object with fallback
  * const cleaner = asHealingObject(asNumber, { age: 0, count: 0 })
  * const result = cleaner({ age: '25', count: 'invalid', extra: '10' })
  * // Returns: { age: 25, count: 0, extra: 10 }
- * // - 'age': '25' converts to number 25 (valid)
- * // - 'count': 'invalid' fails validation, uses fallback 0
- * // - 'extra': '10' converts to number 10 (valid, no fallback needed)
  * ```
  *
  * @example
+ * ```typescript
  * // Key-value object without fallback (invalid entries are dropped)
- * ```javascript
- * import { asHealingObject } from '@edge.app/x-cleaners'
- * import { asNumber } from 'cleaners'
- *
  * const cleaner = asHealingObject(asNumber)
  * const result = cleaner({ valid: '42', invalid: 'not-a-number' })
  * // Returns: { valid: 42 }
- * // - 'valid': '42' converts to number 42 (kept)
- * // - 'invalid': 'not-a-number' fails validation, dropped (no fallback)
  * ```
+ */
+export function asHealingObject<T>(
+  cleaner: Cleaner<T>,
+  fallback?: { [keys: string]: T }
+): Cleaner<{ [keys: string]: T }>
+/**
+ * Cleans a shape object that may contain errors.
+ *
+ * @param shape - A shape object with cleaner functions as values
+ * @param fallback - Required fallback object providing default values for all properties
+ * @returns A cleaner function that returns a cleaned shape object
  *
  * @example
- * // Shape object with fallback
- * ```javascript
+ * ```typescript
  * import { asHealingObject } from '@edge.app/x-cleaners'
  * import { asString, asNumber } from 'cleaners'
  *
+ * // Shape object with fallback
  * const shapeCleaner = asHealingObject(
  *   { name: asString, age: asNumber },
  *   { name: 'Unknown', age: 0 }
  * )
  * const result = shapeCleaner({ name: 'John', age: 'invalid' })
  * // Returns: { name: 'John', age: 0 }
- * // - 'name': 'John' is valid string (kept)
- * // - 'age': 'invalid' fails validation, uses fallback 0
  *
  * const result2 = shapeCleaner({ name: 'John' })
  * // Returns: { name: 'John', age: 0 }
- * // - 'name': 'John' is valid string (kept)
- * // - 'age': missing, uses fallback 0
  * ```
  */
-export function asHealingObject(shape, fallback) {
+export function asHealingObject<T extends object>(
+  shape: CleanerShape<T>,
+  fallback: T
+): Cleaner<T>
+
+export function asHealingObject<T extends object>(
+  shape: Cleaner<T> | CleanerShape<T>,
+  fallback: T
+): Cleaner<T> {
   if (typeof shape === 'function') {
-    return function asMaybeObject(raw) {
-      if (typeof raw !== 'object' || raw == null) return {}
+    return function asMaybeObject(raw: unknown): T {
+      if (typeof raw !== 'object' || raw == null) return {} as T
 
       const out = {}
 
@@ -78,22 +81,25 @@ export function asHealingObject(shape, fallback) {
           ? Object.keys(raw)
           : Object.keys({ ...raw, ...fallback })
       for (let i = 0; i < keys.length; ++i) {
-        const key = keys[i]
+        const key = keys[i] as keyof T
         if (key === '__proto__') continue
         if (fallback?.[key] == null) {
           try {
+            // @ts-expect-error - We know this is a valid key
             out[key] = shape(raw[key])
           } catch (error) {}
         } else {
+          // @ts-expect-error - We know this is a valid key
           out[key] = asMaybe(shape, (fallback ?? {})[key])(raw[key])
         }
       }
-      return out
+      return out as T
     }
   }
 
   const safeShape = { ...shape }
   for (const key of Object.keys(shape)) {
+    // @ts-expect-error - We know this is a valid key
     safeShape[key] = asMaybe(shape[key], fallback[key])
   }
   return asMaybe(asObject(safeShape), fallback)
