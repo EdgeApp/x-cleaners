@@ -1,15 +1,14 @@
 # @edge.app/x-cleaners
 
-To install dependencies:
+A helpful utility library of cleaners.
+
+## Install
 
 ```bash
-bun install
+yarn add @edge.app/x-cleaners
+bun i @edge.app/x-cleaners # or use any other package manager that supports NPM
 ```
 
-To run:
+## Documentation
 
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.3.0. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+All exported cleaners are documented in the [`src/cleaners/`](./src/cleaners/) directory. Each cleaner includes TypeScript type definitions and JSDoc comments explaining its usage.
