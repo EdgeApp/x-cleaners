@@ -29,7 +29,7 @@
     "build:types": "bunx tsc --project tsconfig.build.json",
     "build:copy-types": "bun -e \"const fs=require('fs');fs.mkdirSync('dist',{recursive:true});fs.copyFileSync('src/pouchdb-selector-core.d.ts','dist/pouchdb-selector-core.d.ts');\"",
     "build": "bun run clean && bun run build:esm && bun run build:cjs && bun run build:types && bun run build:copy-types",
-    "precommit": "bun run build",
+    "precommit": "bun run test && bun run build",
     "prepare": "(husky || true) && bun run build",
     "release": "bun run prepare && bunx jsr publish && npm publish",
     "test": "bun test",
