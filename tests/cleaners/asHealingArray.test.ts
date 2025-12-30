@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { asNumber, asString } from 'cleaners'
 
-import { asHealingArray } from '../../src/cleaners/as-healing-array'
+import { asHealingArray } from '../../src/cleaners/asHealingArray'
 
 describe('asHealingArray', () => {
   describe('without fallback', () => {

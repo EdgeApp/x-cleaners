@@ -1,2 +1,2 @@
-export * from './cleaners/as-healing-array'
-export * from './cleaners/as-healing-object'
+export * from './cleaners/asHealingArray'
+export * from './cleaners/asHealingObject'

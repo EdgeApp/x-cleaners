@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { asEither, asNumber, asString } from 'cleaners'
 
-import { asHealingObject } from '../../src/cleaners/as-healing-object'
+import { asHealingObject } from '../../src/cleaners/asHealingObject'
 
 describe('asHealingObject', () => {
   describe('with function cleaner (key-value object)', () => {
