@@ -1,6 +1,5 @@
-import { asMaybe, asObject } from 'cleaners'
-
 import type { Cleaner, CleanerShape } from 'cleaners'
+import { asMaybe, asObject } from 'cleaners'
 
 /**
  * Cleans an object that may contain errors.
@@ -35,8 +34,8 @@ import type { Cleaner, CleanerShape } from 'cleaners'
  */
 export function asHealingObject<T>(
   cleaner: Cleaner<T>,
-  fallback?: { [keys: string]: T }
-): Cleaner<{ [keys: string]: T }>
+  fallback?: Record<string, T>
+): Cleaner<Record<string, T>>
 
 /**
  * Cleans a shape object that may contain errors.
@@ -70,9 +69,10 @@ export function asHealingObject<T extends object>(
 export function asHealingObject<T extends object>(
   shape: Cleaner<T> | CleanerShape<T>,
   fallback: T
-): Cleaner<T | { [keys: string]: T }> {
+): Cleaner<T | Record<string, T>> {
   if (typeof shape === 'function') {
     return function asMaybeObject(raw: unknown): T {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       if (typeof raw !== 'object' || raw == null) return {} as T
 
       const out = {}
@@ -81,6 +81,7 @@ export function asHealingObject<T extends object>(
         fallback == null
           ? Object.keys(raw)
           : Object.keys({ ...raw, ...fallback })
+      // eslint-disable-next-line @typescript-eslint/prefer-for-of
       for (let i = 0; i < keys.length; ++i) {
         const key = keys[i] as keyof T
         if (key === '__proto__') continue
@@ -91,7 +92,7 @@ export function asHealingObject<T extends object>(
           } catch (error) {}
         } else {
           // @ts-expect-error - We know this is a valid key
-          out[key] = asMaybe(shape, (fallback ?? {})[key])(raw[key])
+          out[key] = asMaybe(shape, fallback?.[key])(raw[key])
         }
       }
       return out as T
