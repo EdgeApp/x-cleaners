@@ -37,6 +37,7 @@ export function asHealingObject<T>(
   cleaner: Cleaner<T>,
   fallback?: { [keys: string]: T }
 ): Cleaner<{ [keys: string]: T }>
+
 /**
  * Cleans a shape object that may contain errors.
  *
@@ -69,7 +70,7 @@ export function asHealingObject<T extends object>(
 export function asHealingObject<T extends object>(
   shape: Cleaner<T> | CleanerShape<T>,
   fallback: T
-): Cleaner<T> {
+): Cleaner<T | { [keys: string]: T }> {
   if (typeof shape === 'function') {
     return function asMaybeObject(raw: unknown): T {
       if (typeof raw !== 'object' || raw == null) return {} as T
