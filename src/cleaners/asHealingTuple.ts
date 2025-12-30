@@ -53,4 +53,3 @@ export function asHealingTuple<T, const F extends readonly T[]>(
     return out as { -readonly [K in keyof F]: T }
   }
 }
-

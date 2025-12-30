@@ -1,4 +1,4 @@
-import { type Cleaner } from 'cleaners'
+import type { Cleaner } from 'cleaners'
 
 /**
  * Cleans an array that may contain errors.
